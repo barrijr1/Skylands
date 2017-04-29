@@ -19,6 +19,12 @@ public class PlayerController : MonoBehaviour {
     public int maxJumpCount = 2;
     private int jumpCount;
 
+    private int minScroll = 4;
+    private int maxScroll = 8;
+
+    private GameObject mainCamera;
+    private Camera cameraScroller;
+
     // Use this for initialization
     void Start () {
         anim = GetComponent<Animator>();
@@ -27,28 +33,33 @@ public class PlayerController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		if(Input.GetKey("space"))
+		if(grounded && (Input.GetKeyDown("space") || Input.GetKeyDown("w")))
         {
-            if(jumpCount <= maxJumpCount)
-            {
-                anim.SetBool("Ground", false);
-                body.AddForce(new Vector2(0, jumpForce));
-
-                Debug.Log(body.velocity);
-            }
-            else if(jumpCount >= maxJumpCount && grounded)
-            {
-                jumpCount = 0;
-            }
-        } else if(Input.GetKeyUp("space"))
-        {
-            jumpCount++;
+            anim.SetBool("Ground", false);
+            body.AddForce(new Vector2(0, jumpForce));
         }
-	}
+
+        if (Input.GetAxis("Mouse ScrollWheel") > 0f) // forward
+        {
+            if (cameraScroller.orthographicSize >= minScroll)
+            {
+                cameraScroller.orthographicSize--;
+            }
+        }
+        else if (Input.GetAxis("Mouse ScrollWheel") < 0f) // backwards
+        {
+            if (cameraScroller.orthographicSize <= maxScroll)
+            {
+                cameraScroller.orthographicSize++;
+            }
+        }
+    }
 
     void FixedUpdate()
     {
         float move = Input.GetAxis("Horizontal");
+        mainCamera = GameObject.FindGameObjectWithTag("MainCamera");
+        cameraScroller = mainCamera.GetComponent<Camera>();
 
         grounded = Physics2D.OverlapCircle(groundCheck.position, groundRadius, whatIsGround);
         anim.SetBool("Ground", grounded);
