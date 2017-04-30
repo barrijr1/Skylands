@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+//using System.Linq;
 
 public class GenerateIslands : MonoBehaviour {
 
@@ -22,6 +23,7 @@ public class GenerateIslands : MonoBehaviour {
     private Vector3 center;
     private float minRadius;
     private float strength = 0.5f;
+    private GameObject currentIsland;
 
     // TERRAIN
     private List<Vector3> currIslandV = new List<Vector3>();
@@ -29,10 +31,14 @@ public class GenerateIslands : MonoBehaviour {
     private List<int> currIslandTriangle = new List<int>();
     public Mesh currIslandMesh;
 
-    private List<Vector3> currIslandColVertices = new List<Vector3>();
+    // TERRAIN COLLIDERS
+    private List<Vector2> currIslandColVertices = new List<Vector2>();
     private List<int> currIslandColTriangles = new List<int>();
     private int currIslandColCount;
     private PolygonCollider2D currIslandCol;
+    private int polyPathCount;
+    private PolygonCollider2D polyPoint;
+    private List<Vector2> polyPaths = new List<Vector2>();
 
     private byte[,] blocks;
     private int blocksX;
@@ -52,6 +58,8 @@ public class GenerateIslands : MonoBehaviour {
         currIslandV.Add(new Vector3(x + 1, y, 0));
         currIslandV.Add(new Vector3(x + 1, y - 1, 0));
         currIslandV.Add(new Vector3(x, y - 1, 0));
+
+        //polyPathCount++;
 
         currIslandUV.Add(new Vector2(tUnit * texture.x, tUnit * texture.y + tUnit));
         currIslandUV.Add(new Vector2(tUnit * texture.x + tUnit, tUnit * texture.y + tUnit));
@@ -75,10 +83,12 @@ public class GenerateIslands : MonoBehaviour {
     }
 
 
-    void GenerateBlocks(GameObject currIsland)
+    void GenerateBlocks(GameObject currIsland, float scale)
     {
-        blocks = new byte[(int)currIsland.transform.localScale.x, (int)currIsland.transform.localScale.y];
-        Debug.Log((int)currIsland.transform.localScale.x);
+        blocks = new byte[(int)scale, (int)scale];
+
+        //Debug.Log((int)currIsland.transform.localScale.x);
+
         for (int x = 0; x < blocks.GetLength(0); x++)
         {
             int layerDirt = returnPerlin(x, 0, 1)  + 10;
@@ -92,11 +102,11 @@ public class GenerateIslands : MonoBehaviour {
                     // stone
                     blocks[x, y] = 1;
 
-                    if (returnPerlin(x, y * 6, 1) > 19)
+                    if (returnPerlin(x, y * 6, 1) > 2)
                     {
                         blocks[x, y] = 0;
                     }
-                    if (returnPerlin(x, y * 4, 1) > 27)
+                    if (returnPerlin(x, y * 4, 1) > 3)
                     {
                         // gold
                         blocks[x, y] = 4;
@@ -118,15 +128,23 @@ public class GenerateIslands : MonoBehaviour {
 
     void BuildMesh(GameObject currIsland)
     {
+
         for (int x = 0; x < blocks.GetLength(0); x++)
         {
             for (int y = 0; y < blocks.GetLength(1); y++)
             {
-                GenerateCollider(currIsland, x, y);
+                //GenerateCollider(currIsland, x, y);
+                //Vector2[] eachPolyPoint = polyPaths.ToArray();
+                //polyPoint.SetPath(polyPathCount, eachPolyPoint);
+                //polyPathCount++;
 
                 // if block isn't air
                 if (blocks[x, y] != 0)
                 {
+
+
+                    //polyPaths.Clear();
+
                     if (blocks[x, y] == 1)
                     {
                         GeneratePoints(currIsland, x, y, tStone);
@@ -158,91 +176,155 @@ public class GenerateIslands : MonoBehaviour {
         return blocks[x, y];
     }
 
-    void ColliderTriangles(GameObject currIsland)
-    {
-        currIslandColTriangles.Add(currIslandColCount * 4);
-        currIslandColTriangles.Add((currIslandColCount * 4) + 1);
-        currIslandColTriangles.Add((currIslandColCount * 4) + 3);
-        currIslandColTriangles.Add((currIslandColCount * 4) + 1);
-        currIslandColTriangles.Add((currIslandColCount * 4) + 2);
-        currIslandColTriangles.Add((currIslandColCount * 4) + 3);
-    }
+    //void ColliderTriangles(GameObject currIsland)
+    //{
+    //    currIslandColTriangles.Add(currIslandColCount * 4);
+    //    currIslandColTriangles.Add((currIslandColCount * 4) + 1);
+    //    currIslandColTriangles.Add((currIslandColCount * 4) + 3);
+    //    currIslandColTriangles.Add((currIslandColCount * 4) + 1);
+    //    currIslandColTriangles.Add((currIslandColCount * 4) + 2);
+    //    currIslandColTriangles.Add((currIslandColCount * 4) + 3);
+    //}
 
     void GenerateCollider(GameObject currIsland, int x, int y)
     {
+        Debug.Log("test4124");
+        polyPaths.Add(new Vector2(x, y));
+        polyPaths.Add(new Vector2(x + 1, y));
+        polyPaths.Add(new Vector2(x + 1, y));
+        polyPaths.Add(new Vector2(x, y));
+
         if (Block(currIsland, x, y + 1) == 0)
         {
-            currIslandColVertices.Add(new Vector3(x, y, 1));
-            currIslandColVertices.Add(new Vector3(x + 1, y, 1));
-            currIslandColVertices.Add(new Vector3(x + 1, y, 0));
-            currIslandColVertices.Add(new Vector3(x, y, 0));
+            //polyPaths[0] = new Vector2(x, y);
+            //polyPaths[1] = new Vector2(x + 1, y);
+            //polyPaths[2] = new Vector2(x + 1, y);
+            //polyPaths[3] = new Vector2(x, y);
 
-            ColliderTriangles(currIsland);
+            //polyPoint.SetPath(currIslandColCount, polyPaths);
+            Debug.Log("test11");
+            polyPaths.Add(new Vector2(x, y));
+            polyPaths.Add(new Vector2(x + 1, y));
+            polyPaths.Add(new Vector2(x + 1, y));
+            polyPaths.Add(new Vector2(x, y));
+
+
+            //ColliderTriangles(currIsland);
 
             currIslandColCount++;
+            Debug.Log("test");
         }
 
         //bot
         if (Block(currIsland, x, y - 1) == 0)
         {
-            currIslandColVertices.Add(new Vector3(x, y - 1, 0));
-            currIslandColVertices.Add(new Vector3(x + 1, y - 1, 0));
-            currIslandColVertices.Add(new Vector3(x + 1, y - 1, 1));
-            currIslandColVertices.Add(new Vector3(x, y - 1, 1));
 
-            ColliderTriangles(currIsland);
+            //polyPaths[0] = new Vector2(x, y - 1);
+            // polyPaths[1] = new Vector2(x + 1, y - 1);
+            //polyPaths[2] = new Vector2(x + 1, y - 1);
+            // polyPaths[3] = new Vector2(x, y - 1);
+
+            //polyPoint.SetPath(currIslandColCount, polyPaths);
+
+            polyPaths.Add(new Vector2(x, y - 1));
+            polyPaths.Add(new Vector2(x + 1, y - 1));
+            polyPaths.Add(new Vector2(x + 1, y - 1));
+            polyPaths.Add(new Vector2(x, y - 1));
+
+            //ColliderTriangles(currIsland);
 
             currIslandColCount++;
+            Debug.Log("test2");
         }
 
         //left
         if (Block(currIsland, x - 1, y) == 0)
         {
-            currIslandColVertices.Add(new Vector3(x, y - 1, 1));
-            currIslandColVertices.Add(new Vector3(x, y, 1));
-            currIslandColVertices.Add(new Vector3(x, y, 0));
-            currIslandColVertices.Add(new Vector3(x, y - 1, 0));
+            //polyPaths[0] = new Vector2(x, y - 1);
+            //polyPaths[1] = new Vector2(x, y);
+            //polyPaths[2] = new Vector2(x, y);
+            //polyPaths[3] = new Vector2(x, y - 1);
 
-            ColliderTriangles(currIsland);
+            //polyPoint.SetPath(currIslandColCount, polyPaths);
+
+            polyPaths.Add(new Vector2(x, y - 1));
+            polyPaths.Add(new Vector2(x, y));
+            polyPaths.Add(new Vector2(x, y));
+            polyPaths.Add(new Vector2(x, y - 1));
+
+            // ColliderTriangles(currIsland);
 
             currIslandColCount++;
+            Debug.Log("test3");
         }
 
         //right
         if (Block(currIsland, x + 1, y) == 0)
         {
-            currIslandColVertices.Add(new Vector3(x + 1, y, 1));
-            currIslandColVertices.Add(new Vector3(x + 1, y - 1, 1));
-            currIslandColVertices.Add(new Vector3(x + 1, y - 1, 0));
-            currIslandColVertices.Add(new Vector3(x + 1, y, 0));
+            //polyPaths[0] = new Vector2(x + 1, y);
+            //polyPaths[1] = new Vector2(x + 1, y - 1);
+            //polyPaths[2] = new Vector2(x + 1, y - 1);
+            //polyPaths[3] = new Vector2(x + 1, y);
 
-            ColliderTriangles(currIsland);
+            //polyPoint.SetPath(currIslandColCount, polyPaths);
+
+            polyPaths.Add(new Vector2(x + 1, y));
+            polyPaths.Add(new Vector2(x + 1, y - 1));
+            polyPaths.Add(new Vector2(x + 1, y - 1));
+            polyPaths.Add(new Vector2(x + 1, y));
+
+            //ColliderTriangles(currIsland);
 
             currIslandColCount++;
+            Debug.Log("test4");
         }
+    }
+
+    public Vector2 Vector3To2(Vector3 v)
+    {
+        return new Vector2(v.y, v.z);
     }
 
     void UpdateMesh(GameObject currIsland)
     {
         currIslandMesh.Clear();
         currIslandMesh.vertices = currIslandV.ToArray();
+
+        Vector2[] test = new Vector2[currIslandMesh.vertices.Length];
+
+        Vector3[] points = currIslandMesh.vertices;
+        for (int i = 0; i < test.Length; i++)
+        {
+            test[i].x = points[i].x;
+            test[i].y = points[i].y;
+        }
+
+        polyPoint.points = test;
+
+
         currIslandMesh.triangles = currIslandTriangle.ToArray();
         currIslandMesh.uv = currIslandUV.ToArray();
         currIslandMesh.RecalculateNormals();
 
-        blockCount = 0;
-        currIslandV.Clear();
-        currIslandTriangle.Clear();
-        currIslandUV.Clear();
+        //currIsland.AddComponent<PolygonCollider2D>();
 
-        //Mesh newMesh = new Mesh();
-        //newMesh.vertices = currIslandColVertices.ToArray();
-        //newMesh.triangles = currIslandColTriangles.ToArray();
-        //currIslandCol.sharedMesh = newMesh;
+        //polyPoint.SetPath(polyPathCount, polyPaths);
+        //Debug.Log(polyPaths.ToArray());
 
-        currIslandColVertices.Clear();
-        currIslandColTriangles.Clear();
-        currIslandColCount = 0;
+        //polyPathCount = 0;
+
+
+
+        //polyPaths = null;
+        //polyPathCount = 0;
+        //blockCount = 0;
+        //currIslandV.Clear();
+        //currIslandTriangle.Clear();
+        //currIslandUV.Clear();
+
+        //currIslandColVertices.Clear();
+        //currIslandColTriangles.Clear();
+        //currIslandColCount = 0;
     }
 
     void ScaleParent(Transform child, Transform parent)
@@ -263,10 +345,12 @@ public class GenerateIslands : MonoBehaviour {
 
     IEnumerator TimeInterval(GameObject currIsland)
     {
+        //Destroy(currIsland.GetComponent<PolygonCollider2D>());
         yield return new WaitForSeconds(10);
         Destroy(currIsland.GetComponent<Rigidbody2D>());
         //var col = currIsland.GetComponent<PolygonCollider2D>();
-        //col. = new Vector3(1f, 1f, 0);
+        //col.offset = new Vector3(1f, 1f, 0);
+        //currIsland.AddComponent<PolygonCollider2D>();
     }
 
 
@@ -277,6 +361,7 @@ public class GenerateIslands : MonoBehaviour {
         //newIsland.transform.SetPositionAndRotation(pos, Quaternion.identity);
         currIsland = newIsland;
         ScaleParent(currIsland.transform, gameObject.transform);
+        currentIsland = currIsland;
 
 
 
@@ -285,9 +370,19 @@ public class GenerateIslands : MonoBehaviour {
         List<int> islandTriangle = new List<int>();
 
         var mesh = currIsland.GetComponent<MeshFilter>().mesh;
-        var col = currIsland.GetComponent<PolygonCollider2D>();
+       // var col = currIsland.GetComponent<PolygonCollider2D>();
 
-        col.offset = new Vector3(0.50f, -0.50f, 0);
+        currIslandMesh = mesh;
+        //currIslandCol = col;
+
+        polyPoint = currIsland.GetComponent<PolygonCollider2D>();
+        //polyPoint.pathCount = (int)scale;
+
+        GenerateBlocks(currIsland, scale);
+        BuildMesh(currIsland);
+        UpdateMesh(currIsland);
+
+        //col.offset = new Vector3(0.50f, -0.50f, 0);
 
         //currIsland.transform.position.z.Equals(z);
 
@@ -296,34 +391,34 @@ public class GenerateIslands : MonoBehaviour {
 
         //currIsland.transform.localScale = transform.parent.InverseTransformPoint(Vector3.one);
         currIsland.transform.position =  new Vector3(pos.x, pos.y, transform.localScale.y);
-        currIsland.transform.localScale = new Vector3(scale, scale, transform.localScale.y);
+        //currIsland.transform.localScale = new Vector3(scale, scale, transform.localScale.y);
 
         var rotationVector = currIsland.transform.rotation.eulerAngles;
         rotationVector.z = angle;
         currIsland.transform.rotation = Quaternion.Euler(rotationVector);
 
-        island.Add(new Vector3(x, y, 0));
-        island.Add(new Vector3(x + 1, y, 0));
-        island.Add(new Vector3(x + 1, y - 1, 0));
-        island.Add(new Vector3(x, y - 1, 0));
+        //island.Add(new Vector3(x, y, 0));
+        //island.Add(new Vector3(x + 1, y, 0));
+        //island.Add(new Vector3(x + 1, y - 1, 0));
+        //island.Add(new Vector3(x, y - 1, 0));
 
-        islandTriangle.Add(0);
-        islandTriangle.Add(1);
-        islandTriangle.Add(3);
-        islandTriangle.Add(1);
-        islandTriangle.Add(2);
-        islandTriangle.Add(3);
+        //islandTriangle.Add(0);
+        //islandTriangle.Add(1);
+        //islandTriangle.Add(3);
+        //islandTriangle.Add(1);
+        //islandTriangle.Add(2);
+        //islandTriangle.Add(3);
 
-        islandUV.Add(new Vector2(0, 0));
-        islandUV.Add(new Vector2(0, 1));
-        islandUV.Add(new Vector2(1, 1));
-        islandUV.Add(new Vector2(1, 0));
+        //islandUV.Add(new Vector2(0, 0));
+        //islandUV.Add(new Vector2(0, 1));
+        //islandUV.Add(new Vector2(1, 1));
+        //islandUV.Add(new Vector2(1, 0));
 
-        mesh.Clear();
-        mesh.vertices = island.ToArray();
-        mesh.triangles = islandTriangle.ToArray();
-        mesh.uv = islandUV.ToArray();
-        mesh.RecalculateNormals();
+        //mesh.Clear();
+        //mesh.vertices = island.ToArray();
+        //mesh.triangles = islandTriangle.ToArray();
+        //mesh.uv = islandUV.ToArray();
+        //mesh.RecalculateNormals();
 
         //if (Physics2D.OverlapCircle(currIsland.transform.position, scale))
         //{
@@ -331,15 +426,8 @@ public class GenerateIslands : MonoBehaviour {
         //    //MoveIsland(currIsland);
         //}
 
-        currIslandMesh = mesh;
-        currIslandCol = currIsland.GetComponent<PolygonCollider2D>();
-
-       // GenerateBlocks(currIsland);
-        //BuildMesh(currIsland);
-       // UpdateMesh(currIsland);
-
         StartCoroutine(TimeInterval(currIsland));
-
+        currentIsland = null;
     }
 
 
@@ -349,7 +437,7 @@ public class GenerateIslands : MonoBehaviour {
         var col = centerIsland.GetComponent<BoxCollider2D>();
 
         centerIsland.transform.localScale = new Vector3(size, size, transform.localScale.y);
-        Debug.Log(radius);
+        //Debug.Log(radius);
 
         var centerPosX = centerIsland.transform.position.x - 0.50f;
         var centerPosY = centerIsland.transform.position.y + 0.50f;
@@ -437,5 +525,8 @@ public class GenerateIslands : MonoBehaviour {
 
     // Update is called once per frame
     void Update () {
+        //BuildMesh(currentIsland);
+        //UpdateMesh(currentIsland);
     }
 }
+

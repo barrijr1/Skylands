@@ -79,6 +79,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\Level\BlockPlaceExample.cs" />
+    <Compile Include="Assets\Scripts\Level\ColliderCreator.cs" />
     <Compile Include="Assets\Scripts\Level\ColliderExample.cs" />
     <Compile Include="Assets\Scripts\Level\GenerateIslands.cs" />
     <Compile Include="Assets\Scripts\Level\IslandGenerator.cs" />
